@@ -136,8 +136,34 @@ const createProductService = async (productData) => {
   }
 };
 
+const updateProductService = async (productId, productData) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      productData,
+      { new: true }
+    ).populate("category", "name slug");
+    return product;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+const deleteProductService = async (productId) => {
+  try {
+    const product = await Product.findByIdAndDelete(productId);
+    return product;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
 module.exports = {
   getProductsService,
   getProductDetailService,
-  createProductService
+  createProductService,
+  updateProductService,
+  deleteProductService
 };

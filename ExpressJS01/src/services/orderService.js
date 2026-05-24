@@ -96,6 +96,57 @@ const getOrdersByUserId = async (userId) => {
   }
 };
 
+const getAllOrders = async () => {
+  try {
+    const orders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .populate("items.product")
+      .populate("user", "name email");
+
+    return {
+      EC: 0,
+      EM: "Lay danh sach don hang thanh cong",
+      DT: orders
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EC: -1,
+      EM: "Loi server",
+      DT: ""
+    };
+  }
+};
+
+const getOrderByIdAdmin = async (orderId) => {
+  try {
+    const order = await Order.findById(orderId)
+      .populate("items.product")
+      .populate("user", "name email");
+
+    if (!order) {
+      return {
+        EC: 1,
+        EM: "Don hang khong ton tai",
+        DT: ""
+      };
+    }
+
+    return {
+      EC: 0,
+      EM: "Lay don hang thanh cong",
+      DT: order
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EC: -1,
+      EM: "Loi server",
+      DT: ""
+    };
+  }
+};
+
 const getOrderById = async (orderId, userId) => {
   try {
     const order = await Order.findOne({ _id: orderId, user: userId })
@@ -236,6 +287,8 @@ module.exports = {
   createOrder,
   getOrdersByUserId,
   getOrderById,
+  getAllOrders,
+  getOrderByIdAdmin,
   updateOrderStatus,
   cancelOrder
 };

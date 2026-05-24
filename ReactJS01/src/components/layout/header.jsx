@@ -16,12 +16,12 @@ const Header = () => {
     
     const items = [
         {
-            label: <Link to={"/"}>Home Page</Link>,
+            label: <Link to={"/"}>Trang chủ</Link>,
             key: 'home',
             icon: <HomeOutlined />,
         },
         ...(isAuthenticated ? [{
-            label: <Link to={"/user"}>Users</Link>,
+            label: <Link to={"/user"}>Người dùng</Link>,
             key: 'user',
             icon: <UsergroupAddOutlined />,
         }] : []),
@@ -35,9 +35,14 @@ const Header = () => {
             key: 'orders',
             icon: <ShoppingOutlined />,
         }] : []),
+        ...(isAuthenticated && user?.isAdmin ? [{
+            label: <Link to={"/admin"}>Quản trị</Link>,
+            key: 'admin',
+            icon: <SettingOutlined />,
+        }] : []),
 
         {
-            label: `Welcome ${user?.email ?? ""}`,
+            label: `Xin chào ${user?.email ?? ""}`,
             key: 'SubMenu',
             icon: <SettingOutlined />,
             children: [

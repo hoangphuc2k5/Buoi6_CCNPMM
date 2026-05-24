@@ -9,7 +9,13 @@ const UserPage = () => {
         const fetchUser = async () => {
             const res = await getUserApi();
             if (!res?.message) {
-                setDataSource(res)
+                if (Array.isArray(res)) {
+                    setDataSource(res);
+                } else if (res?.data && Array.isArray(res.data)) {
+                    setDataSource(res.data);
+                } else {
+                    setDataSource([]);
+                }
             } else {
                 notification.error({
                     message: "Không được phép",

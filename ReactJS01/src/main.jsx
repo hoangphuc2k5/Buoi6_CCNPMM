@@ -21,6 +21,18 @@ import CartPage from './pages/cart.jsx';
 import CheckoutPage from './pages/checkout.jsx';
 import OrdersPage from './pages/orders.jsx';
 import OrderDetailPage from './pages/order-detail.jsx';
+import AdminRoute from './components/auth/AdminRoute.jsx';
+import AdminLayout from './components/layout/admin-layout.jsx';
+import {
+    AdminDashboardPage,
+    AdminProductsPage,
+    AdminCategoriesPage,
+    AdminOrdersPage,
+    AdminUsersPage,
+    AdminVouchersPage,
+    AdminInventoryPage,
+    AdminReviewsPage
+} from './pages/admin/index.js';
 import { Provider } from 'react-redux';
 import store from './Redux/store.js';
 
@@ -77,6 +89,25 @@ const router = createBrowserRouter([
                 path: "profile",
                 element: <ProfilePage />
             },
+        ]
+    },
+    {
+        path: "/admin",
+        element: <AdminRoute />,
+        children: [
+            {
+                element: <AdminLayout />,
+                children: [
+                    { index: true, element: <AdminDashboardPage /> },
+                    { path: "products", element: <AdminProductsPage /> },
+                    { path: "categories", element: <AdminCategoriesPage /> },
+                    { path: "orders", element: <AdminOrdersPage /> },
+                    { path: "users", element: <AdminUsersPage /> },
+                    { path: "vouchers", element: <AdminVouchersPage /> },
+                    { path: "inventory", element: <AdminInventoryPage /> },
+                    { path: "reviews", element: <AdminReviewsPage /> }
+                ]
+            }
         ]
     },
     {

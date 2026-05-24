@@ -91,7 +91,7 @@ const AddCategoryPage = () => {
                         />
                         <div className="flex gap-3 items-end">
                             <Input
-                                label="Slug (URL)"
+                                label="Đường dẫn (URL)"
                                 name="slug"
                                 value={formData.slug}
                                 onChange={handleChange}

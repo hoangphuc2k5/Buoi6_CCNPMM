@@ -8,6 +8,18 @@ import { getCategoriesApi, getProductsApi } from "../util/api";
 const formatPrice = (value) =>
     new Intl.NumberFormat("vi-VN").format(value) + " VNĐ";
 
+const getPriceInfo = (product) => {
+    const price = Number(product?.price) || 0;
+    const discount = Number(product?.discountPercent) || 0;
+
+    if (product?.isPromo && discount > 0) {
+        const discounted = Math.round(price * (1 - discount / 100));
+        return { current: discounted, original: price };
+    }
+
+    return { current: price, original: null };
+};
+
 const HomePage = () => {
     const dispatch = useDispatch();
     const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -111,7 +123,7 @@ const HomePage = () => {
                 setProducts(productsData);
                 setTotal(totalData);
             } else {
-                setError(res?.data?.message || "Khong the tai danh sach san pham.");
+                setError(res?.data?.message || "Không thể tải danh sách sản phẩm.");
                 setProducts([]);
                 setTotal(0);
             }
@@ -280,7 +292,7 @@ const HomePage = () => {
                                     >
                                         <div className="relative overflow-hidden rounded-2xl">
                                             <img
-                                                src={product.images?.[0] || "https://via.placeholder.com/300x250?text=No+Image"}
+                                                src={product.images?.[0] || "https://via.placeholder.com/300x250?text=Ch%C6%B0a+c%C3%B3+%E1%BA%A3nh"}
                                                 alt={product.name}
                                                 className="h-48 w-full object-cover transition duration-500 group-hover:scale-105"
                                             />
@@ -297,9 +309,16 @@ const HomePage = () => {
                                             <h3 className="mt-2 font-display text-xl text-ink">
                                                 {product.name}
                                             </h3>
-                                            <p className="mt-3 text-lg font-semibold text-ink">
-                                                {formatPrice(product.price)}
-                                            </p>
+                                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                                <p className="text-lg font-semibold text-ink">
+                                                    {formatPrice(getPriceInfo(product).current)}
+                                                </p>
+                                                {getPriceInfo(product).original ? (
+                                                    <p className="text-sm text-black/40 line-through">
+                                                        {formatPrice(getPriceInfo(product).original)}
+                                                    </p>
+                                                ) : null}
+                                            </div>
                                             <div className="mt-3 flex items-center justify-between text-xs text-black/60">
                                                 <span>Đã bán: {product.sold}</span>
                                                 <span>Lượt xem: {product.views || 0}</span>
@@ -484,9 +503,16 @@ const HomePage = () => {
                                     {product.description}
                                 </p>
                                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                                    <p className="text-lg font-semibold text-ink">
-                                        {formatPrice(product.price)}
-                                    </p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <p className="text-lg font-semibold text-ink">
+                                            {formatPrice(getPriceInfo(product).current)}
+                                        </p>
+                                        {getPriceInfo(product).original ? (
+                                            <p className="text-sm text-black/40 line-through">
+                                                {formatPrice(getPriceInfo(product).original)}
+                                            </p>
+                                        ) : null}
+                                    </div>
                                     <p
                                         className={`text-xs font-semibold ${
                                             product.stock > 0 ? "text-reef" : "text-ember"

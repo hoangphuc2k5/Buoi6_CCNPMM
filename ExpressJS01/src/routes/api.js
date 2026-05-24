@@ -4,14 +4,23 @@ const {
     handleLogin,
     getUser,
     getAccount,
-    forgotPassword
+    forgotPassword,
+    getUserDetail,
+    updateUserLock
 } = require('../controllers/userController');
 const {
     getProducts,
     getProductDetail,
-    createProduct
+    createProduct,
+    updateProduct,
+    deleteProduct
 } = require('../controllers/productController');
-const { getCategories, createCategory } = require('../controllers/categoryController');
+const {
+    getCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory
+} = require('../controllers/categoryController');
 const {
     getCart,
     addToCart,
@@ -23,9 +32,16 @@ const {
     createOrder,
     getOrders,
     getOrderDetail,
-    cancelOrder
+    cancelOrder,
+    getAllOrdersAdmin,
+    getOrderDetailAdmin,
+    updateOrderStatusAdmin
 } = require('../controllers/orderController');
+const { getDashboardStats } = require('../controllers/adminController');
+const { getVouchers, createVoucher, updateVoucher, deleteVoucher } = require('../controllers/voucherController');
+const { getReviews, approveReview, deleteReview } = require('../controllers/reviewController');
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const delay = require('../middleware/delay');
 
 const routerAPI = express.Router();
@@ -40,14 +56,14 @@ routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
 routerAPI.post("/forgot-password", forgotPassword);
 
-routerAPI.get("/user", getUser);
+routerAPI.get("/user", admin, getUser);
 routerAPI.get("/account", delay, getAccount);
 
 routerAPI.get("/products", getProducts);
 routerAPI.get("/products/:id", getProductDetail);
-routerAPI.post("/products", createProduct);
+routerAPI.post("/products", admin, createProduct);
 routerAPI.get("/categories", getCategories);
-routerAPI.post("/categories", createCategory);
+routerAPI.post("/categories", admin, createCategory);
 
 routerAPI.get("/cart", getCart);
 routerAPI.post("/cart", addToCart);
@@ -59,5 +75,31 @@ routerAPI.post("/orders", createOrder);
 routerAPI.get("/orders", getOrders);
 routerAPI.get("/orders/:orderId", getOrderDetail);
 routerAPI.post("/orders/:orderId/cancel", cancelOrder);
+
+// Admin routes
+routerAPI.get("/admin/dashboard", admin, getDashboardStats);
+
+routerAPI.put("/admin/products/:id", admin, updateProduct);
+routerAPI.delete("/admin/products/:id", admin, deleteProduct);
+
+routerAPI.put("/admin/categories/:id", admin, updateCategory);
+routerAPI.delete("/admin/categories/:id", admin, deleteCategory);
+
+routerAPI.get("/admin/orders", admin, getAllOrdersAdmin);
+routerAPI.get("/admin/orders/:orderId", admin, getOrderDetailAdmin);
+routerAPI.put("/admin/orders/:orderId/status", admin, updateOrderStatusAdmin);
+
+routerAPI.get("/admin/users", admin, getUser);
+routerAPI.get("/admin/users/:userId", admin, getUserDetail);
+routerAPI.put("/admin/users/:userId/lock", admin, updateUserLock);
+
+routerAPI.get("/admin/vouchers", admin, getVouchers);
+routerAPI.post("/admin/vouchers", admin, createVoucher);
+routerAPI.put("/admin/vouchers/:id", admin, updateVoucher);
+routerAPI.delete("/admin/vouchers/:id", admin, deleteVoucher);
+
+routerAPI.get("/admin/reviews", admin, getReviews);
+routerAPI.put("/admin/reviews/:id/approve", admin, approveReview);
+routerAPI.delete("/admin/reviews/:id", admin, deleteReview);
 
 module.exports = routerAPI; //export default

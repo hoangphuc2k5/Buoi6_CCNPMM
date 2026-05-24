@@ -29,11 +29,19 @@ const auth = async (req, res, next) => {
                         message: "User khong ton tai"
                     });
                 }
+
+                if (user.isLocked) {
+                    return res.status(403).json({
+                        message: "Tai khoan da bi khoa"
+                    });
+                }
                 
                 req.user = {
                     _id: user._id,
                     email: user.email,
                     name: user.name,
+                    role: user.role,
+                    isAdmin: user.isAdmin,
                     createdBy: "hoidanit"
                 }
                 console.log(">>> check token and user: ", decoded, user)

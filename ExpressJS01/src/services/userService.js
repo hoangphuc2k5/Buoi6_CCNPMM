@@ -20,7 +20,9 @@ const createUserService = async (name, email, password) => {
             name: name,
             email: email,
             password: hashPassword,
-            role: "User"
+            role: "User",
+            isAdmin: false,
+            isLocked: false
         })
         return result;
 
@@ -35,6 +37,12 @@ const loginService = async (email1, password) => {
         //fetch user by email
         const user = await User.findOne({ email: email1 });
         if (user) {
+            if (user.isLocked) {
+                return {
+                    EC: 3,
+                    EM: "Tai khoan da bi khoa"
+                }
+            }
             //compare password
             const isMatchPassword = await bcrypt.compare(password, user.password);
             if (!isMatchPassword) {
@@ -47,7 +55,8 @@ const loginService = async (email1, password) => {
                 const payload = {
                     _id: user._id,
                     email: user.email,
-                    name: user.name
+                    name: user.name,
+                    isAdmin: user.isAdmin
                 }
 
                 const access_token = jwt.sign(
@@ -63,7 +72,8 @@ const loginService = async (email1, password) => {
                     user: {
                         _id: user._id,
                         email: user.email,
-                        name: user.name
+                        name: user.name,
+                        isAdmin: user.isAdmin
                     }
                 };
             }
@@ -84,6 +94,30 @@ const getUserService = async () => {
         let result = await User.find({}).select("-password");
         return result;
 
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+const getUserByIdService = async (userId) => {
+    try {
+        const user = await User.findById(userId).select("-password");
+        return user;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+const updateUserLockService = async (userId, isLocked) => {
+    try {
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { isLocked: !!isLocked },
+            { new: true }
+        ).select("-password");
+        return user;
     } catch (error) {
         console.log(error);
         return null;
@@ -113,5 +147,10 @@ const forgotPasswordService = async (email) => {
 }
 
 module.exports = {
-    createUserService, loginService, getUserService, forgotPasswordService
+    createUserService,
+    loginService,
+    getUserService,
+    forgotPasswordService,
+    getUserByIdService,
+    updateUserLockService
 }

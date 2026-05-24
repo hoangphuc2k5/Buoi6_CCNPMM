@@ -124,6 +124,8 @@ const authSlice = createSlice({
           email: action.payload.email,
           name: action.payload.name,
           createdBy: action.payload.createdBy,
+          isAdmin: action.payload.isAdmin,
+          role: action.payload.role
         };
       })
       .addCase(fetchAccountThunk.rejected, (state, action) => {

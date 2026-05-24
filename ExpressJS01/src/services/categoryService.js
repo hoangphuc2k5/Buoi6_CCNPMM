@@ -21,7 +21,33 @@ const createCategoryService = async (categoryData) => {
   }
 };
 
+const updateCategoryService = async (categoryId, categoryData) => {
+  try {
+    const category = await Category.findByIdAndUpdate(
+      categoryId,
+      categoryData,
+      { new: true }
+    );
+    return category;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+const deleteCategoryService = async (categoryId) => {
+  try {
+    const category = await Category.findByIdAndDelete(categoryId);
+    return category;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
 module.exports = {
   getCategoriesService,
-  createCategoryService
+  createCategoryService,
+  updateCategoryService,
+  deleteCategoryService
 };

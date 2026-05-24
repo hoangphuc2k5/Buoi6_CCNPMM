@@ -106,6 +106,97 @@ const cancelOrderApi = (orderId, reason) => {
     return axios.post(URL_API, { reason })
 }
 
+// Admin APIs
+const getAdminDashboardApi = () => {
+    const URL_API = "/v1/api/admin/dashboard";
+    return axios.get(URL_API)
+}
+
+const getAdminOrdersApi = () => {
+    const URL_API = "/v1/api/admin/orders";
+    return axios.get(URL_API)
+}
+
+const getAdminOrderDetailApi = (orderId) => {
+    const URL_API = `/v1/api/admin/orders/${orderId}`;
+    return axios.get(URL_API)
+}
+
+const updateAdminOrderStatusApi = (orderId, payload) => {
+    const URL_API = `/v1/api/admin/orders/${orderId}/status`;
+    return axios.put(URL_API, payload)
+}
+
+const updateAdminProductApi = (productId, payload) => {
+    const URL_API = `/v1/api/admin/products/${productId}`;
+    return axios.put(URL_API, payload)
+}
+
+const deleteAdminProductApi = (productId) => {
+    const URL_API = `/v1/api/admin/products/${productId}`;
+    return axios.delete(URL_API)
+}
+
+const updateAdminCategoryApi = (categoryId, payload) => {
+    const URL_API = `/v1/api/admin/categories/${categoryId}`;
+    return axios.put(URL_API, payload)
+}
+
+const deleteAdminCategoryApi = (categoryId) => {
+    const URL_API = `/v1/api/admin/categories/${categoryId}`;
+    return axios.delete(URL_API)
+}
+
+const getAdminUsersApi = () => {
+    const URL_API = "/v1/api/admin/users";
+    return axios.get(URL_API)
+}
+
+const getAdminUserDetailApi = (userId) => {
+    const URL_API = `/v1/api/admin/users/${userId}`;
+    return axios.get(URL_API)
+}
+
+const updateAdminUserLockApi = (userId, isLocked) => {
+    const URL_API = `/v1/api/admin/users/${userId}/lock`;
+    return axios.put(URL_API, { isLocked })
+}
+
+const getAdminVouchersApi = () => {
+    const URL_API = "/v1/api/admin/vouchers";
+    return axios.get(URL_API)
+}
+
+const createAdminVoucherApi = (payload) => {
+    const URL_API = "/v1/api/admin/vouchers";
+    return axios.post(URL_API, payload)
+}
+
+const updateAdminVoucherApi = (id, payload) => {
+    const URL_API = `/v1/api/admin/vouchers/${id}`;
+    return axios.put(URL_API, payload)
+}
+
+const deleteAdminVoucherApi = (id) => {
+    const URL_API = `/v1/api/admin/vouchers/${id}`;
+    return axios.delete(URL_API)
+}
+
+const getAdminReviewsApi = (status) => {
+    const URL_API = "/v1/api/admin/reviews";
+    return axios.get(URL_API, { params: { status } })
+}
+
+const approveAdminReviewApi = (id) => {
+    const URL_API = `/v1/api/admin/reviews/${id}/approve`;
+    return axios.put(URL_API)
+}
+
+const deleteAdminReviewApi = (id) => {
+    const URL_API = `/v1/api/admin/reviews/${id}`;
+    return axios.delete(URL_API)
+}
+
 export {
     createUserApi,
     loginApi,
@@ -125,5 +216,23 @@ export {
     createOrderApi,
     getOrdersApi,
     getOrderDetailApi,
-    cancelOrderApi
+    cancelOrderApi,
+    getAdminDashboardApi,
+    getAdminOrdersApi,
+    getAdminOrderDetailApi,
+    updateAdminOrderStatusApi,
+    updateAdminProductApi,
+    deleteAdminProductApi,
+    updateAdminCategoryApi,
+    deleteAdminCategoryApi,
+    getAdminUsersApi,
+    getAdminUserDetailApi,
+    updateAdminUserLockApi,
+    getAdminVouchersApi,
+    createAdminVoucherApi,
+    updateAdminVoucherApi,
+    deleteAdminVoucherApi,
+    getAdminReviewsApi,
+    approveAdminReviewApi,
+    deleteAdminReviewApi
 }

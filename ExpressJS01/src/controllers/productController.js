@@ -1,7 +1,9 @@
 const {
   getProductsService,
   getProductDetailService,
-  createProductService
+  createProductService,
+  updateProductService,
+  deleteProductService
 } = require("../services/productService");
 
 const getProducts = async (req, res) => {
@@ -32,8 +34,28 @@ const createProduct = async (req, res) => {
   return res.status(201).json({ data: product, message: "Tao san pham thanh cong!" });
 };
 
+const updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const product = await updateProductService(id, req.body);
+  if (!product) {
+    return res.status(404).json({ message: "Khong tim thay san pham." });
+  }
+  return res.status(200).json({ data: product, message: "Cap nhat san pham thanh cong!" });
+};
+
+const deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  const product = await deleteProductService(id);
+  if (!product) {
+    return res.status(404).json({ message: "Khong tim thay san pham." });
+  }
+  return res.status(200).json({ data: product, message: "Xoa san pham thanh cong!" });
+};
+
 module.exports = {
   getProducts,
   getProductDetail,
-  createProduct
+  createProduct,
+  updateProduct,
+  deleteProduct
 };

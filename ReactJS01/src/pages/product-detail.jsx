@@ -9,6 +9,18 @@ import { addItemToCart } from "../Redux/cartSlice";
 const formatPrice = (value) =>
   new Intl.NumberFormat("vi-VN").format(value) + " VNĐ";
 
+const getPriceInfo = (product) => {
+  const price = Number(product?.price) || 0;
+  const discount = Number(product?.discountPercent) || 0;
+
+  if (product?.isPromo && discount > 0) {
+    const discounted = Math.round(price * (1 - discount / 100));
+    return { current: discounted, original: price };
+  }
+
+  return { current: price, original: null };
+};
+
 const ProductDetailPage = () => {
   const { productId } = useParams();
   const dispatch = useDispatch();
@@ -28,7 +40,7 @@ const ProductDetailPage = () => {
       if (res?.data) {
         setProduct(res.data.data || res.data);
       } else {
-        setError(res?.data?.message || "Khong tim thay san pham.");
+        setError(res?.data?.message || "Không tìm thấy sản phẩm.");
         setProduct(null);
       }
       setLoading(false);
@@ -137,13 +149,13 @@ const ProductDetailPage = () => {
       } else if (result.payload) {
         message.error(result.payload.EM || 'Có lỗi xảy ra');
       } else if (result.error) {
-        message.error('Có lỗi xảy ra: ' + (result.error.message || 'Unknown error'));
+        message.error('Có lỗi xảy ra: ' + (result.error.message || 'Lỗi không xác định'));
       } else {
         message.error('Có lỗi xảy ra');
       }
     } catch (error) {
       console.error('Add to cart error:', error);
-      message.error('Có lỗi xảy ra: ' + (error.message || 'Unknown error'));
+      message.error('Có lỗi xảy ra: ' + (error.message || 'Lỗi không xác định'));
     } finally {
       setAddingToCart(false);
     }
@@ -209,9 +221,16 @@ const ProductDetailPage = () => {
             </h1>
             <p className="mt-3 text-sm text-black/70">{product.description}</p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
-              <p className="text-2xl font-semibold text-ink">
-                {formatPrice(product.price)}
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-2xl font-semibold text-ink">
+                  {formatPrice(getPriceInfo(product).current)}
+                </p>
+                {getPriceInfo(product).original ? (
+                  <p className="text-base text-black/40 line-through">
+                    {formatPrice(getPriceInfo(product).original)}
+                  </p>
+                ) : null}
+              </div>
               {product.isPromo ? (
                 <span className="rounded-full bg-ember px-3 py-1 text-xs font-semibold text-white">
                   Giảm {product.discountPercent}%
@@ -309,7 +328,7 @@ const ProductDetailPage = () => {
                   className="h-40 w-full rounded-2xl object-cover"
                 />
                 <p className="mt-3 text-xs uppercase tracking-[0.2em] text-black/50">
-                  {item.category?.name || "Danh muc"}
+                  {item.category?.name || "Danh mục"}
                 </p>
                 <h3 className="mt-2 font-display text-2xl text-ink">
                   {item.name}

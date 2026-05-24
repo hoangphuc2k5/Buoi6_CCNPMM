@@ -8,7 +8,7 @@ const AuthLayout = ({ title, subtitle, children, footer }) => {
 
       <div className="relative mx-auto grid w-full max-w-5xl gap-10 lg:grid-cols-[1.1fr_1fr]">
         <div className="flex flex-col justify-center gap-6">
-          <p className="text-sm uppercase tracking-[0.3em] text-reef">Telegram</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-reef">Cửa hàng</p>
           <h1 className="font-display text-4xl font-semibold text-ink sm:text-5xl">
             {title}
           </h1>
