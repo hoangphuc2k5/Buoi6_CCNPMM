@@ -3,7 +3,14 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 const auth = async (req, res, next) => {
-    const white_lists = ["/", "/register", "/login", "/forgot-password"];
+    const white_lists = [
+        "/",
+        "/register",
+        "/login",
+        "/forgot-password",
+        "/forgot-password/verify",
+        "/forgot-password/reset"
+    ];
     const public_prefixes = ["/products", "/categories"];
     const isPublicExact = white_lists.find(
         item => '/v1/api' + item === req.originalUrl

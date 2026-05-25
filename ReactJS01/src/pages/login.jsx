@@ -27,7 +27,7 @@ const LoginPage = () => {
         }
         const result = await dispatch(loginThunk(formState));
         if (loginThunk.fulfilled.match(result)) {
-            navigate("/profile");
+            navigate("/");
         }
     };
 

@@ -3,7 +3,7 @@ const orderService = require("../services/orderService");
 const createOrder = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { paymentMethod, shippingAddress } = req.body;
+    const { paymentMethod, shippingAddress, voucherCode } = req.body;
     
     if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.address) {
       return res.status(400).json({
@@ -13,7 +13,7 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const response = await orderService.createOrder(userId, { paymentMethod, shippingAddress });
+    const response = await orderService.createOrder(userId, { paymentMethod, shippingAddress, voucherCode });
     return res.status(200).json(response);
   } catch (error) {
     console.log(error);
@@ -153,6 +153,31 @@ const updateOrderStatusAdmin = async (req, res) => {
   }
 };
 
+const updateOrderPaymentStatusAdmin = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { paymentStatus } = req.body;
+
+    if (!orderId || typeof paymentStatus !== "boolean") {
+      return res.status(400).json({
+        EC: 1,
+        EM: "Thieu orderId hoac paymentStatus",
+        DT: ""
+      });
+    }
+
+    const response = await orderService.updateOrderPaymentStatus(orderId, paymentStatus);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      EC: -1,
+      EM: "Loi server",
+      DT: ""
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
@@ -160,5 +185,6 @@ module.exports = {
   cancelOrder,
   getAllOrdersAdmin,
   getOrderDetailAdmin,
-  updateOrderStatusAdmin
+  updateOrderStatusAdmin,
+  updateOrderPaymentStatusAdmin
 };

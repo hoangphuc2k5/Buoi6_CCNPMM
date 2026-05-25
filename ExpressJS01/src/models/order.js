@@ -57,6 +57,18 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
+    originalPrice: {
+      type: Number,
+      default: 0
+    },
+    discountAmount: {
+      type: Number,
+      default: 0
+    },
+    voucherCode: {
+      type: String,
+      default: ""
+    },
     paymentMethod: {
       type: String,
       enum: Object.values(PAYMENT_METHOD),

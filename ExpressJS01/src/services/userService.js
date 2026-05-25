@@ -2,7 +2,26 @@ require("dotenv").config();
 const User = require("../models/user");
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const saltRounds = 10;
+const OTP_TTL_MINUTES = 10;
+
+const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+const getMailTransporter = () => {
+    const port = Number(process.env.MAIL_PORT || 465);
+    return nodemailer.createTransport({
+        host: process.env.MAIL_HOST,
+        port: port,
+        secure: port === 465,
+        auth: {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASS
+        }
+    });
+}
 
 const createUserService = async (name, email, password) => {
     try {
@@ -133,16 +152,98 @@ const forgotPasswordService = async (email) => {
                 EM: "Email khong ton tai"
             };
         }
-        return {
+        const otp = generateOtp();
+        const hashOtp = await bcrypt.hash(otp, saltRounds);
+        user.otpCode = hashOtp;
+        user.otpExpires = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
+        await user.save();
+
+        const transporter = getMailTransporter();
+        const fromAddress = process.env.MAIL_FROM || process.env.MAIL_USER;
+
+        await transporter.sendMail({
+            from: fromAddress,
+            to: email,
+            subject: "Ma OTP khoi phuc mat khau",
+            text: `Ma OTP cua ban la: ${otp}. Ma co hieu luc trong ${OTP_TTL_MINUTES} phut.`,
+            html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                <h2>Khoi phuc mat khau</h2>
+                <p>Ma OTP cua ban la:</p>
+                <div style="font-size: 24px; font-weight: bold; letter-spacing: 4px;">${otp}</div>
+                <p>Ma co hieu luc trong ${OTP_TTL_MINUTES} phut.</p>
+              </div>
+            `
+        });
+
+        const response = {
             EC: 0,
-            EM: "Yeu cau khoi phuc da duoc ghi nhan"
+            EM: "Da gui OTP, vui long kiem tra"
         };
+
+        if (process.env.NODE_ENV !== "production") {
+            response.DT = { otp };
+        }
+
+        return response;
     } catch (error) {
         console.log(error);
         return {
             EC: 2,
-            EM: "Co loi xay ra"
+            EM: "Khong the gui OTP"
         };
+    }
+}
+
+const verifyForgotPasswordOtpService = async (email, otp) => {
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return { EC: 1, EM: "Email khong ton tai" };
+        }
+
+        if (!user.otpCode || !user.otpExpires || user.otpExpires < new Date()) {
+            return { EC: 2, EM: "OTP het han hoac khong ton tai" };
+        }
+
+        const isMatch = await bcrypt.compare(otp, user.otpCode);
+        if (!isMatch) {
+            return { EC: 3, EM: "OTP khong dung" };
+        }
+
+        return { EC: 0, EM: "OTP hop le" };
+    } catch (error) {
+        console.log(error);
+        return { EC: 4, EM: "Co loi xay ra" };
+    }
+}
+
+const resetPasswordService = async (email, otp, newPassword) => {
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return { EC: 1, EM: "Email khong ton tai" };
+        }
+
+        if (!user.otpCode || !user.otpExpires || user.otpExpires < new Date()) {
+            return { EC: 2, EM: "OTP het han hoac khong ton tai" };
+        }
+
+        const isMatch = await bcrypt.compare(otp, user.otpCode);
+        if (!isMatch) {
+            return { EC: 3, EM: "OTP khong dung" };
+        }
+
+        const hashPassword = await bcrypt.hash(newPassword, saltRounds);
+        user.password = hashPassword;
+        user.otpCode = "";
+        user.otpExpires = null;
+        await user.save();
+
+        return { EC: 0, EM: "Doi mat khau thanh cong" };
+    } catch (error) {
+        console.log(error);
+        return { EC: 4, EM: "Co loi xay ra" };
     }
 }
 
@@ -151,6 +252,8 @@ module.exports = {
     loginService,
     getUserService,
     forgotPasswordService,
+    verifyForgotPasswordOtpService,
+    resetPasswordService,
     getUserByIdService,
     updateUserLockService
 }

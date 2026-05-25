@@ -15,6 +15,14 @@ const userSchema = new mongoose.Schema({
     isLocked: {
         type: Boolean,
         default: false
+    },
+    otpCode: {
+        type: String,
+        default: ""
+    },
+    otpExpires: {
+        type: Date,
+        default: null
     }
 });
 

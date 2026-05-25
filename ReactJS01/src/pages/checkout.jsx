@@ -3,7 +3,7 @@ import { Form, Input, Button, Card, Typography, Radio, message, Space, Divider, 
 import { CreditCardOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { createOrderApi } from '../util/api';
+import { createOrderApi, validateVoucherApi } from '../util/api';
 import { fetchCart } from '../Redux/cartSlice';
 
 const { Title, Text } = Typography;
@@ -17,6 +17,10 @@ const CheckoutPage = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('COD');
+    const [voucherCode, setVoucherCode] = useState('');
+    const [voucherLoading, setVoucherLoading] = useState(false);
+    const [appliedVoucher, setAppliedVoucher] = useState(null);
+    const [discountAmount, setDiscountAmount] = useState(0);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -39,6 +43,7 @@ const CheckoutPage = () => {
         try {
             const orderData = {
                 paymentMethod,
+                voucherCode: appliedVoucher?.code || '',
                 shippingAddress: {
                     fullName: values.fullName,
                     phone: values.phone,
@@ -63,7 +68,28 @@ const CheckoutPage = () => {
         }
     };
 
+    const handleApplyVoucher = async () => {
+        if (!voucherCode.trim()) {
+            message.warning('Vui long nhap ma giam gia');
+            return;
+        }
+        setVoucherLoading(true);
+        const res = await validateVoucherApi(voucherCode.trim());
+        if (res?.EC === 0) {
+            setAppliedVoucher({ code: res.DT.code });
+            setDiscountAmount(res.DT.discountAmount || 0);
+            message.success('Ap dung ma giam gia thanh cong');
+        } else {
+            setAppliedVoucher(null);
+            setDiscountAmount(0);
+            message.error(res?.EM || 'Khong the ap dung ma giam gia');
+        }
+        setVoucherLoading(false);
+    };
+
     const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    const originalTotal = cart?.totalPrice || 0;
+    const finalTotal = Math.max(originalTotal - discountAmount, 0);
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
@@ -163,16 +189,42 @@ const CheckoutPage = () => {
                         />
                         
                         <Divider />
+
+                        <div className="mb-4">
+                            <Text strong>Ma giam gia</Text>
+                            <div className="flex gap-2 mt-2">
+                                <Input
+                                    placeholder="Nhap ma giam gia"
+                                    value={voucherCode}
+                                    onChange={(e) => setVoucherCode(e.target.value)}
+                                />
+                                <Button
+                                    type="primary"
+                                    onClick={handleApplyVoucher}
+                                    loading={voucherLoading}
+                                >
+                                    Ap dung
+                                </Button>
+                            </div>
+                            {appliedVoucher ? (
+                                <Text type="success">Da ap dung: {appliedVoucher.code}</Text>
+                            ) : null}
+                        </div>
                         
                         <div className="flex justify-between mb-2">
                             <Text>Tổng số sản phẩm:</Text>
                             <Text>{totalItems} sản phẩm</Text>
                         </div>
                         
+                        <div className="flex justify-between mb-2">
+                            <Text>Giam gia:</Text>
+                            <Text type="success">-{discountAmount.toLocaleString('vi-VN')} ₫</Text>
+                        </div>
+
                         <div className="flex justify-between">
-                            <Title level={4} className="mb-0">Tổng tiền:</Title>
+                            <Title level={4} className="mb-0">Tong tien:</Title>
                             <Title level={4} type="danger" className="mb-0">
-                                {cart?.totalPrice?.toLocaleString('vi-VN') || 0} ₫
+                                {finalTotal.toLocaleString('vi-VN')} ₫
                             </Title>
                         </div>
                     </Card>

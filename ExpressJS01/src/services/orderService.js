@@ -1,6 +1,7 @@
 const { Order, ORDER_STATUS, PAYMENT_METHOD } = require("../models/order");
 const Cart = require("../models/cart");
 const Product = require("../models/product");
+const Voucher = require("../models/voucher");
 
 const createOrder = async (userId, orderData) => {
   try {
@@ -32,10 +33,57 @@ const createOrder = async (userId, orderData) => {
       price: item.price
     }));
 
+    let discountAmount = 0;
+    let appliedVoucher = null;
+    const originalPrice = cart.totalPrice;
+    const voucherCode = orderData.voucherCode?.trim()?.toUpperCase();
+
+    if (voucherCode) {
+      const voucher = await Voucher.findOne({ code: voucherCode });
+      const now = new Date();
+
+      if (!voucher || !voucher.isActive) {
+        return { EC: 3, EM: "Ma giam gia khong hop le", DT: "" };
+      }
+
+      if (voucher.startAt && now < voucher.startAt) {
+        return { EC: 4, EM: "Ma giam gia chua den thoi gian ap dung", DT: "" };
+      }
+
+      if (voucher.endAt && now > voucher.endAt) {
+        return { EC: 5, EM: "Ma giam gia da het han", DT: "" };
+      }
+
+      if (voucher.usageLimit > 0 && voucher.usedCount >= voucher.usageLimit) {
+        return { EC: 6, EM: "Ma giam gia da het luot su dung", DT: "" };
+      }
+
+      if (voucher.minOrder > 0 && originalPrice < voucher.minOrder) {
+        return { EC: 7, EM: "Don hang chua dat gia tri toi thieu", DT: "" };
+      }
+
+      if (voucher.type === "percent") {
+        discountAmount = (originalPrice * voucher.value) / 100;
+        if (voucher.maxDiscount > 0) {
+          discountAmount = Math.min(discountAmount, voucher.maxDiscount);
+        }
+      } else {
+        discountAmount = voucher.value;
+      }
+
+      discountAmount = Math.min(discountAmount, originalPrice);
+      appliedVoucher = voucher;
+    }
+
+    const finalPrice = Math.max(originalPrice - discountAmount, 0);
+
     const order = new Order({
       user: userId,
       items: orderItems,
-      totalPrice: cart.totalPrice,
+      totalPrice: finalPrice,
+      originalPrice: originalPrice,
+      discountAmount: discountAmount,
+      voucherCode: appliedVoucher ? appliedVoucher.code : "",
       paymentMethod: orderData.paymentMethod || PAYMENT_METHOD.COD,
       shippingAddress: orderData.shippingAddress,
       status: ORDER_STATUS.NEW
@@ -52,6 +100,12 @@ const createOrder = async (userId, orderData) => {
 
     await order.save();
     await Cart.findOneAndUpdate({ user: userId }, { items: [] });
+
+    if (appliedVoucher) {
+      await Voucher.findByIdAndUpdate(appliedVoucher._id, {
+        $inc: { usedCount: 1 }
+      });
+    }
 
     setTimeout(async () => {
       const pendingOrder = await Order.findById(order._id);
@@ -210,6 +264,35 @@ const updateOrderStatus = async (orderId, status, note = "") => {
   }
 };
 
+const updateOrderPaymentStatus = async (orderId, paymentStatus) => {
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return {
+        EC: 1,
+        EM: "Đơn hàng không tồn tại",
+        DT: ""
+      };
+    }
+
+    order.paymentStatus = paymentStatus;
+    await order.save();
+
+    return {
+      EC: 0,
+      EM: "Cập nhật trạng thái thanh toán thành công",
+      DT: order
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EC: -1,
+      EM: "Lỗi server",
+      DT: ""
+    };
+  }
+};
+
 const cancelOrder = async (orderId, userId, reason = "") => {
   try {
     const order = await Order.findOne({ _id: orderId, user: userId });
@@ -290,5 +373,6 @@ module.exports = {
   getAllOrders,
   getOrderByIdAdmin,
   updateOrderStatus,
+  updateOrderPaymentStatus,
   cancelOrder
 };

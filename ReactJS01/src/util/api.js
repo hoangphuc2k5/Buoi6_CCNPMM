@@ -34,6 +34,16 @@ const forgotPasswordApi = (email) => {
     return axios.post(URL_API, data)
 }
 
+const verifyForgotPasswordOtpApi = (email, otp) => {
+    const URL_API = "/v1/api/forgot-password/verify";
+    return axios.post(URL_API, { email, otp })
+}
+
+const resetPasswordApi = (email, otp, newPassword) => {
+    const URL_API = "/v1/api/forgot-password/reset";
+    return axios.post(URL_API, { email, otp, newPassword })
+}
+
 const getProductsApi = (params) => {
     const URL_API = "/v1/api/products";
     return axios.get(URL_API, { params })
@@ -106,6 +116,11 @@ const cancelOrderApi = (orderId, reason) => {
     return axios.post(URL_API, { reason })
 }
 
+const validateVoucherApi = (code) => {
+    const URL_API = "/v1/api/vouchers/validate";
+    return axios.post(URL_API, { code })
+}
+
 // Admin APIs
 const getAdminDashboardApi = () => {
     const URL_API = "/v1/api/admin/dashboard";
@@ -124,6 +139,11 @@ const getAdminOrderDetailApi = (orderId) => {
 
 const updateAdminOrderStatusApi = (orderId, payload) => {
     const URL_API = `/v1/api/admin/orders/${orderId}/status`;
+    return axios.put(URL_API, payload)
+}
+
+const updateAdminOrderPaymentStatusApi = (orderId, payload) => {
+    const URL_API = `/v1/api/admin/orders/${orderId}/payment`;
     return axios.put(URL_API, payload)
 }
 
@@ -203,6 +223,8 @@ export {
     getUserApi,
     getAccountApi,
     forgotPasswordApi,
+    verifyForgotPasswordOtpApi,
+    resetPasswordApi,
     getProductsApi,
     getProductDetailApi,
     getCategoriesApi,
@@ -217,10 +239,12 @@ export {
     getOrdersApi,
     getOrderDetailApi,
     cancelOrderApi,
+    validateVoucherApi,
     getAdminDashboardApi,
     getAdminOrdersApi,
     getAdminOrderDetailApi,
     updateAdminOrderStatusApi,
+    updateAdminOrderPaymentStatusApi,
     updateAdminProductApi,
     deleteAdminProductApi,
     updateAdminCategoryApi,

@@ -1,8 +1,9 @@
 import React from "react";
 import { Layout, Menu } from "antd";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import Header from "./header";
 
-const { Header, Sider, Content } = Layout;
+const { Header: AntHeader, Sider, Content } = Layout;
 
 const menuItems = [
   { key: "/admin", label: <Link to="/admin">Bảng điều khiển</Link> },
@@ -29,9 +30,9 @@ const AdminLayout = () => {
         />
       </Sider>
       <Layout>
-        <Header style={{ background: "#fff", padding: "0 24px", fontWeight: 600 }}>
-          Quản trị hệ thống
-        </Header>
+        <AntHeader style={{ background: "#fff", padding: 0 }}>
+          <Header />
+        </AntHeader>
         <Content style={{ padding: 24 }}>
           <Outlet />
         </Content>

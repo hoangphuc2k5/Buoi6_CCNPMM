@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { fetchAccountThunk, logout } from "../Redux/authSlice";
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, isAuthenticated, appLoading } = useSelector(
     (state) => state.auth
   );
@@ -60,7 +61,13 @@ const ProfilePage = () => {
             <Button onClick={() => dispatch(fetchAccountThunk())}>
               Làm mới
             </Button>
-            <Button variant="ghost" onClick={() => dispatch(logout())}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                dispatch(logout());
+                navigate("/login");
+              }}
+            >
               Đăng xuất
             </Button>
           </div>

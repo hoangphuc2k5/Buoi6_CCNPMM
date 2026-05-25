@@ -3,6 +3,8 @@ const {
     loginService,
     getUserService,
     forgotPasswordService,
+    verifyForgotPasswordOtpService,
+    resetPasswordService,
     getUserByIdService,
     updateUserLockService
 } = require("../services/userService");
@@ -36,6 +38,18 @@ const forgotPassword = async (req, res) => {
     return res.status(200).json(data);
 }
 
+const verifyForgotPasswordOtp = async (req, res) => {
+    const { email, otp } = req.body;
+    const data = await verifyForgotPasswordOtpService(email, otp);
+    return res.status(200).json(data);
+}
+
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    const data = await resetPasswordService(email, otp, newPassword);
+    return res.status(200).json(data);
+}
+
 const getUserDetail = async (req, res) => {
     const { userId } = req.params;
     const data = await getUserByIdService(userId);
@@ -61,6 +75,8 @@ module.exports = {
     getUser,
     getAccount,
     forgotPassword,
+    verifyForgotPasswordOtp,
+    resetPassword,
     getUserDetail,
     updateUserLock
 }

@@ -236,16 +236,20 @@ const OrderDetailPage = () => {
 
                         <div className="space-y-2">
                             <div className="flex justify-between">
-                                <Text>Tạm tính:</Text>
-                                <Text>{order.totalPrice.toLocaleString('vi-VN')} ₫</Text>
+                                <Text>Tam tinh:</Text>
+                                <Text>{(order.originalPrice ?? order.totalPrice).toLocaleString('vi-VN')} ₫</Text>
                             </div>
                             <div className="flex justify-between">
-                                <Text>Phí vận chuyển:</Text>
+                                <Text>Ma giam gia:</Text>
+                                <Text type="success">-{(order.discountAmount || 0).toLocaleString('vi-VN')} ₫</Text>
+                            </div>
+                            <div className="flex justify-between">
+                                <Text>Phi van chuyen:</Text>
                                 <Text>0 ₫</Text>
                             </div>
                             <Divider className="my-2" />
                             <div className="flex justify-between">
-                                <Text strong className="text-lg">Tổng cộng:</Text>
+                                <Text strong className="text-lg">Tong tien:</Text>
                                 <Text type="danger" strong className="text-lg">
                                     {order.totalPrice.toLocaleString('vi-VN')} ₫
                                 </Text>
