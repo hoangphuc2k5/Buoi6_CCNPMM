@@ -6,7 +6,8 @@ const {
     verifyForgotPasswordOtpService,
     resetPasswordService,
     getUserByIdService,
-    updateUserLockService
+    updateUserLockService,
+    updateProfileService
 } = require("../services/userService");
 
 const createUser = async (req, res) => {
@@ -30,6 +31,22 @@ const getUser = async (req, res) => {
 const getAccount = async (req, res) => {
 
     return res.status(200).json(req.user)
+}
+
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const updateData = req.body;
+        const data = await updateProfileService(userId, updateData);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EC: -1,
+            EM: "Loi server",
+            DT: ""
+        });
+    }
 }
 
 const forgotPassword = async (req, res) => {
@@ -74,6 +91,7 @@ module.exports = {
     handleLogin,
     getUser,
     getAccount,
+    updateProfile,
     forgotPassword,
     verifyForgotPasswordOtp,
     resetPassword,

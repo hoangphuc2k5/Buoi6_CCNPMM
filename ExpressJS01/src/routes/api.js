@@ -8,7 +8,8 @@ const {
     verifyForgotPasswordOtp,
     resetPassword,
     getUserDetail,
-    updateUserLock
+    updateUserLock,
+    updateProfile
 } = require('../controllers/userController');
 const {
     getProducts,
@@ -63,6 +64,7 @@ routerAPI.post("/forgot-password/reset", resetPassword);
 
 routerAPI.get("/user", admin, getUser);
 routerAPI.get("/account", delay, getAccount);
+routerAPI.put("/account", updateProfile);
 
 routerAPI.get("/products", getProducts);
 routerAPI.get("/products/:id", getProductDetail);

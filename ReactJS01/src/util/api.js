@@ -69,6 +69,11 @@ const createCategoryApi = (categoryData) => {
     return axios.post(URL_API, categoryData)
 }
 
+const updateProfileApi = (profileData) => {
+    const URL_API = "/v1/api/account";
+    return axios.put(URL_API, profileData)
+}
+
 const getCartApi = () => {
     const URL_API = "/v1/api/cart";
     return axios.get(URL_API)
@@ -230,6 +235,7 @@ export {
     getCategoriesApi,
     createProductApi,
     createCategoryApi,
+    updateProfileApi,
     getCartApi,
     addToCartApi,
     updateCartApi,

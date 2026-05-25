@@ -4,6 +4,7 @@ import {
   forgotPasswordApi,
   getAccountApi,
   loginApi,
+  updateProfileApi,
 } from "../util/api";
 
 const initialState = {
@@ -62,6 +63,18 @@ export const forgotPasswordThunk = createAsyncThunk(
       return res;
     }
     return rejectWithValue(res?.EM || "Không thể xử lý yêu cầu.");
+  }
+);
+
+export const updateProfileThunk = createAsyncThunk(
+  "auth/updateProfile",
+  async (profileData, { rejectWithValue }) => {
+    const res = await updateProfileApi(profileData);
+    console.log('Update profile response:', res);
+    if (res?.EC === 0) {
+      return res.DT;
+    }
+    return rejectWithValue(res?.EM || "Cập nhật thất bại.");
   }
 );
 
@@ -148,6 +161,27 @@ const authSlice = createSlice({
       .addCase(forgotPasswordThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Không thể xử lý yêu cầu.";
+      })
+      .addCase(updateProfileThunk.pending, (state) => {
+        state.loading = true;
+        state.error = "";
+        state.message = "";
+      })
+      .addCase(updateProfileThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = "";
+        state.message = "Cập nhật thành công!";
+        if (state.user) {
+          state.user = {
+            ...state.user,
+            name: action.payload.name,
+            email: action.payload.email,
+          };
+        }
+      })
+      .addCase(updateProfileThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Cập nhật thất bại.";
       });
   },
 });
